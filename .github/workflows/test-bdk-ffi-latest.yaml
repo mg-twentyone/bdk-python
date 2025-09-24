@@ -99,7 +99,7 @@ jobs:
       
       - name: "Update bdk-ffi submodule to latest"
         run: |
-          cd ../../bdk-ffi/ \
+          cd ./bdk-ffi/ \
           && git fetch origin \
           && git checkout master \
           && git pull origin master \
@@ -162,7 +162,7 @@ jobs:
 
       - name: "Update bdk-ffi submodule to latest"
         run: |
-          cd ../../bdk-ffi/ \
+          cd ./bdk-ffi/ \
           && git fetch origin \
           && git checkout master \
           && git pull origin master \
@@ -222,7 +222,7 @@ jobs:
 
       - name: "Update bdk-ffi submodule to latest"
         run: |
-          cd ../../bdk-ffi/ \
+          cd ./bdk-ffi/ \
           && git fetch origin \
           && git checkout master \
           && git pull origin master \
