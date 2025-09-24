@@ -222,11 +222,11 @@ jobs:
 
       - name: "Update bdk-ffi submodule to latest"
         run: |
-          cd ./bdk-ffi/ \
-          && git fetch origin \
-          && git checkout master \
-          && git pull origin master \
-          && echo "Testing commit: $(git log -1 --pretty=format:'%h %s (author: %cn)')"
+          cd ./bdk-ffi/; 
+          git fetch origin; 
+          git checkout master; 
+          git pull origin master; 
+          echo "Testing commit: $(git log -1 --pretty=format:'%h %s (author: %cn)')"
 
       - name: "Cache"
         uses: actions/cache@v3
