@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   build-manylinux_2_28-x86_64-wheels:
-    name: "Build and test Manylinux 2.28 x86_64 wheels against the latest commit on bdk-ffi"
+    name: "Build and run unittest on Manylinux 2.28 x86_64 wheels against the latest commit on bdk-ffi"
     runs-on: ubuntu-24.04
     container:
       image: quay.io/pypa/manylinux_2_28_x86_64
@@ -78,8 +78,8 @@ jobs:
           path: /home/runner/work/bdk-python/bdk-python/dist/*.whl
 
   build-macos-arm64-wheels:
-    name: "Build and test macOS arm64 wheels against the latest commit on bdk-ffi"
-    runs-on: macos-13
+    name: "Build and run unittest on macOS arm64 wheels against the latest commit on bdk-ffi"
+    runs-on: macos-14
     strategy:
       matrix:
         python:
@@ -128,11 +128,10 @@ jobs:
         # see issue #350 for more information
         run: python3 -m build --wheel --config-setting=--build-option=--plat-name=macosx_11_0_arm64 --verbose
 
-      # You can't install the arm64 wheel on the CI, so we skip these steps and simply test that the wheel builds
-      # - name: "Install wheel and run tests"
-      #   run: |
-      #     pip3 install ./dist/*.whl
-      #     python3 -m unittest discover --start "./tests/" --pattern "test_offline_*.py" --verbose
+      - name: "Install wheel and run tests"
+        run: |
+          pip3 install ./dist/*.whl
+          python3 -m unittest discover --start "./tests/" --pattern "test_offline_*.py" --verbose
 
       - name: "Upload artifact test"
         uses: actions/upload-artifact@v4
@@ -141,7 +140,7 @@ jobs:
           path: /Users/runner/work/bdk-python/bdk-python/dist/*.whl
 
   build-macos-x86_64-wheels:
-    name: "Build and test macOS x86_64 wheels against the latest commit on bdk-ffi"
+    name: "Build and run unittest on macOS x86_64 wheels against the latest commit on bdk-ffi"
     runs-on: macos-13
     strategy:
       matrix:
@@ -201,7 +200,7 @@ jobs:
           path: /Users/runner/work/bdk-python/bdk-python/dist/*.whl
 
   build-windows-wheels:
-    name: "Build and test Windows wheels against the latest commit on bdk-ffi"
+    name: "Build and run unittest on Windows wheels against the latest commit on bdk-ffi"
     runs-on: windows-2022
     strategy:
       matrix:
