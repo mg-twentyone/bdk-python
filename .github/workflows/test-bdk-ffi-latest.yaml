@@ -1,8 +1,6 @@
-name: Trigger Tests for BDK-FFI Latest Commit
+name: Test on BDK-FFI Latest Commit
 
 on:
-  push:
-      branches: [ "test/workflow" ]
   workflow_dispatch:
   repository_dispatch:
     types: [ trigger-bdk-python-test ]
@@ -10,7 +8,7 @@ on:
 permissions: {}
 
 jobs:
-  build-manylinux_2_28-x86_64-wheels:
+  test-bdk-ffi-latest-manylinux_2_28-x86_64-wheels:
     name: "Build and run unittest on Manylinux 2.28 x86_64 wheels against the latest commit on bdk-ffi"
     runs-on: ubuntu-24.04
     container:
@@ -79,7 +77,7 @@ jobs:
           name: bdkpython-manylinux_2_28_x86_64-${{ matrix.python }}
           path: /home/runner/work/bdk-python/bdk-python/dist/*.whl
 
-  build-macos-arm64-wheels:
+  test-bdk-ffi-latest-macos-arm64-wheels:
     name: "Build and run unittest on macOS arm64 wheels against the latest commit on bdk-ffi"
     runs-on: macos-14
     strategy:
@@ -130,7 +128,7 @@ jobs:
         # see issue #350 for more information
         run: python3 -m build --wheel --config-setting=--build-option=--plat-name=macosx_11_0_arm64 --verbose
 
-      - name: "Install wheel and run tests"
+      - name: "Install wheel"
         run: pip3 install ./dist/*.whl
           
       - name: "Run tests"
@@ -142,9 +140,9 @@ jobs:
           name: bdkpython-macos-arm64-${{ matrix.python }}
           path: /Users/runner/work/bdk-python/bdk-python/dist/*.whl
 
-  build-macos-x86_64-wheels:
+  test-bdk-ffi-latest-macos-x86_64-wheels:
     name: "Build and run unittest on macOS x86_64 wheels against the latest commit on bdk-ffi"
-    runs-on: macos-13
+    runs-on: macos-15-intel
     strategy:
       matrix:
         python:
@@ -202,7 +200,7 @@ jobs:
           name: bdkpython-macos-x86_64-${{ matrix.python }}
           path: /Users/runner/work/bdk-python/bdk-python/dist/*.whl
 
-  build-windows-wheels:
+  test-bdk-ffi-latest-windows-wheels:
     name: "Build and run unittest on Windows wheels against the latest commit on bdk-ffi"
     runs-on: windows-2022
     strategy:
