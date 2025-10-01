@@ -99,7 +99,7 @@ jobs:
             fi
 
             TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
-            if [[ -n "$TOOLCHAIN" && "$override" == "true"]]; then
+            if [[ -n "$TOOLCHAIN" && "$override" == "true" ]]; then
               echo "Setting override and default to toolchain: $TOOLCHAIN"
               rustup override set "$TOOLCHAIN"
               rustup default "$TOOLCHAIN"
