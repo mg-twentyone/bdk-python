@@ -66,10 +66,11 @@ jobs:
           cd ./bdk-ffi/bdk-ffi
 
           CHANNEL=$(grep 'channel' rust-toolchain.toml | cut -d '"' -f 2)
-          COMPONENTS=$(grep 'components' rust-toolchain.toml | cut -d '[' -f 2 | cut -d ']' -f 1 | tr -d ' ')
+          COMPONENTS=$(grep 'components' rust-toolchain.toml | cut -d '[' -f 2 | cut -d ']' -f 1 | tr -d ' ' | tr -d '"')
 
           rustup install $CHANNEL
           rustup default $CHANNEL
+          rustup override set $CHANNEL  # Set the override explicitly
           if [ -n "$COMPONENTS" ]; then
             for component in $(echo $COMPONENTS | tr ',' ' '); do
               rustup component add $component
