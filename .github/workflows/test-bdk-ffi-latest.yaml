@@ -56,7 +56,7 @@ jobs:
       - name: List all files recursively
         run: |
           cd ./bdk-ffi/ \
-          ls -laR
+          && ls -laR
       
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
