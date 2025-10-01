@@ -56,7 +56,7 @@ jobs:
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          path: '**/rust-toolchain.toml'
+          rust-src-dir: '**/rust-toolchain.toml'
           
       - name: "Generate bdk.py and binaries"
         run: bash ./scripts/generate-linux.sh
