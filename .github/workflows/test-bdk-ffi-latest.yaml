@@ -66,10 +66,7 @@ jobs:
           toolchain: ${{ env.CHANNEL }}
           
       - name: "Generate bdk.py and binaries"
-        run: |
-          rustc --version \
-          && which rustc \ 
-          && bash ./scripts/generate-linux.sh
+        run: bash ./scripts/generate-linux.sh
 
       - name: "Install build"
         run: ${PYBIN}/pip install build
