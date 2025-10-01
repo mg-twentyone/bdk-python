@@ -120,7 +120,21 @@ jobs:
               rustup override set ${toolchain//*,/ }
             fi
           fi
-                  
+       
+      - name: Print installed versions
+        shell: bash
+        run: |
+          echo "rustc-version=$(rustc --version)" >> $GITHUB_OUTPUT
+          rustc --version --verbose
+          echo "cargo-version=$(cargo --version)" >> $GITHUB_OUTPUT
+          cargo --version --verbose
+          echo "rustup-version=$(rustup --version)" >> $GITHUB_OUTPUT
+          rustup --version
+
+          DATE=$(rustc --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+          HASH=$(rustc --version --verbose | sed -ne 's/^commit-hash: //p')
+          echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
+
       - name: "Generate bdk.py and binaries"
         run: bash ./scripts/generate-linux.sh
 
