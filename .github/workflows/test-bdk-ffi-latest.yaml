@@ -97,6 +97,12 @@ jobs:
               echo "Error: Failed to install toolchain from rust-toolchain file."
               exit 1
             fi
+
+            TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
+            echo "Setting override and default to toolchain: $TOOLCHAIN"
+            rustup override set "$TOOLCHAIN"
+            rustup default "$TOOLCHAIN"
+
             if [[ -n $components ]]; then
               echo "Adding components: ${components//,/ }"
               rustup component add ${components//,/ }
@@ -120,10 +126,6 @@ jobs:
               rustup override set ${toolchain//*,/ }
             fi
           fi
-          TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
-          echo "${TOOLCHAIN}"
-          rustup override set "$TOOLCHAIN"
-          rustup default "$TOOLCHAIN"
       
       - name: Print installed versions
         shell: bash
