@@ -51,15 +51,31 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ./target
-          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','*Cargo.lock') }}
+
+      - name: Install rustup, if needed
+        shell: bash
+        run: |
+          if ! command -v rustup &> /dev/null ; then
+            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- --default-toolchain none -y
+
+            # Resolve the correct CARGO_HOME path depending on OS
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              echo "${CARGO_HOME:-$USERPROFILE/.cargo}/bin" | sed 's|/|\\|g' >> $GITHUB_PATH
+            else
+              echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
+            fi
+          fi
+        env:
+          RUNNER_OS: "${{ runner.os }}"
 
       - name: rustup toolchain install ${{inputs.toolchain || 'stable'}}
         env:
-          toolchain: ${{inputs.toolchain}}
-          targets: ${{inputs.target}}
-          components: ${{inputs.components}}
-          override: ${{inputs.override}}
-          rust_src_dir: ${{inputs.rust-src-dir}}
+          toolchain: 1.84.1
+          targets: null
+          components: clippy
+          override: true
+          rust_src_dir: "./bdk-ffi/bdk-ffi"
         shell: bash
         run: |
           echo "Current Directory: $(pwd)"
