@@ -53,17 +53,57 @@ jobs:
             ./target
           key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
 
-      - name: Get Rust Channel
-        run: |
-          cd ./bdk-ffi/bdk-ffi
-          CHANNEL=$(grep 'channel' rust-toolchain.toml | cut -d '"' -f 2)
-          echo "CHANNEL=$CHANNEL" >> $GITHUB_ENV
+      - name: rustup toolchain install ${{inputs.toolchain || 'stable'}}
+        env:
+          toolchain: 1.84.1
+          targets: null
+          components: clippy
+          override: true
+          rust_src_dir: "./bdk-ffi/bdk-ffi"
+          shell: bash
+          run: |
+            echo "Current Directory: $(pwd)"
+            echo "Rust Source Directory: $rust_src_dir"
+            echo "Toolchain: $toolchain"
+            echo "Targets: $targets"
+            echo "Components: $components"
+            echo "Override: $override"
 
-      - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.0
-        with:
-          rust-src-dir: ./bdk-ffi/bdk-ffi
-          toolchain: ${{ env.CHANNEL }}
+            if [[ -d "$rust_src_dir" ]]; then
+              cd "$rust_src_dir"
+              echo "Changed directory to: $(pwd)"
+            fi
+
+            if [[ -z "$toolchain" && ( -f "rust-toolchain" || -f "rust-toolchain.toml") ]]; then
+              echo "Installing toolchain from rust-toolchain file..."
+              rustup show active-toolchain || rustup toolchain install
+              if [[ $? -ne 0 ]]; then
+                echo "Error: Failed to install toolchain from rust-toolchain file."
+                exit 1
+              fi
+              if [[ -n $components ]]; then
+                echo "Adding components: ${components//,/ }"
+                rustup component add ${components//,/ }
+              fi
+              if [[ -n $targets ]]; then
+                echo "Adding targets: ${targets//,/ }"
+                rustup target add ${targets//,/ }
+              fi
+            else
+              if [[ -z "$toolchain" ]]; then
+                toolchain=stable
+              fi
+              echo "Installing specified toolchain: ${toolchain//,/ }"
+              rustup toolchain install ${toolchain//,/ } ${{steps.flags.outputs.targets}}${{steps.flags.outputs.components}} --profile minimal${{steps.flags.outputs.downgrade}} --no-self-update
+              if [[ $? -ne 0 ]]; then
+                echo "Error: Failed to install specified toolchain."
+                exit 1
+              fi
+              if [[ "$override" == "true" ]]; then
+                echo "Setting override to toolchain: ${toolchain//*,/ }"
+                rustup override set ${toolchain//*,/ }
+              fi
+            fi
           
       - name: "Generate bdk.py and binaries"
         run: bash ./scripts/generate-linux.sh
