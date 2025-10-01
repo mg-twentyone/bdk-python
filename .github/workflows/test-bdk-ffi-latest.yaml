@@ -53,28 +53,42 @@ jobs:
             ./target
           key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
 
-      - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.0
-        with:
-          rust-src-dir: ./bdk-ffi/bdk-ffi
-          cache-workspaces: true
-          toolchain: stable
-
-      - name: Set up Rust (force)
-        id: rust-toolchain
+      # - name: Set up Rust
+      #   uses: actions-rust-lang/setup-rust-toolchain@v1.15.0
+      #   with:
+      #     rust-src-dir: ./bdk-ffi/bdk-ffi
+      #     cache-workspaces: true
+      #     toolchain: stable
+      
+      - id: check-path
+        name: Check PATH
         run: |
-          cd ./bdk-ffi/bdk-ffi
+          echo "Current PATH: $PATH"
+          echo "Checking for rustc and cargo:"
+          which rustc
+          which cargo
 
-          CHANNEL=$(grep 'channel' rust-toolchain.toml | cut -d '"' -f 2)
-          COMPONENTS=$(grep 'components' rust-toolchain.toml | cut -d '[' -f 2 | cut -d ']' -f 1 | tr -d ' ' | tr -d '"')
+      - id: versions
+        name: Print installed versions
+        shell: bash
+        run: |
+          echo "rustc-version=$(rustc --version)" >> $GITHUB_OUTPUT
+          RUSTC_VERBOSE_OUTPUT=$(rustc --version --verbose)
+          echo "$RUSTC_VERBOSE_OUTPUT"
+          echo "cargo-version=$(cargo --version)" >> $GITHUB_OUTPUT
+          cargo --version --verbose
+          echo "rustup-version=$(rustup --version)" >> $GITHUB_OUTPUT
+          rustup --version
 
-          rustup install $CHANNEL
-          rustup default $CHANNEL
-          rustup override set $CHANNEL  # Set the override explicitly
-          if [ -n "$COMPONENTS" ]; then
-            for component in $(echo $COMPONENTS | tr ',' ' '); do
-              rustup component add $component
-            done
+          # Extract date and hash using sed
+          DATE=$(echo "$RUSTC_VERBOSE_OUTPUT" | sed -ne 's/^commit-date: $20[0-9][0-9]$-$[01][0-9]$-$[0-3][0-9]$$/\1\2\3/p')
+          HASH=$(echo "$RUSTC_VERBOSE_OUTPUT" | sed -ne 's/^commit-hash: //p')
+
+          # Check if DATE and HASH are empty
+          if [ -z "$DATE" ] || [ -z "$HASH" ]; then
+            echo "Failed to extract date or hash from rustc verbose output."
+          else
+            echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
           fi
 
       - name: "Generate bdk.py and binaries"
