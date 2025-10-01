@@ -52,16 +52,12 @@ jobs:
             ~/.cargo/git
             ./target
           key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
-      
-      - name: Display rust-toolchain.toml
-        run: cat ./bdk-ffi/bdk-ffi/rust-toolchain.toml
 
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.0
         with:
           rust-src-dir: ./bdk-ffi/bdk-ffi
           override: true
-          toolchain: stable
           
       - name: "Generate bdk.py and binaries"
         run: bash ./scripts/generate-linux.sh
