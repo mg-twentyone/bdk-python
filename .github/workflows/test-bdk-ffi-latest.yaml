@@ -71,7 +71,7 @@ jobs:
 
       - name: rustup toolchain install ${{inputs.toolchain || 'stable'}}
         env:
-          toolchain: 1.84.1
+          toolchain: null
           targets: null
           components: clippy
           override: true
