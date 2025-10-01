@@ -92,7 +92,7 @@ jobs:
 
           if [[ -z "$toolchain" && ( -f "rust-toolchain" || -f "rust-toolchain.toml") ]]; then
             echo "Installing toolchain from rust-toolchain file..."
-            rustup show active-toolchain || rustup toolchain install
+            rustup show active-toolchain || rustup show
             if [[ $? -ne 0 ]]; then
               echo "Error: Failed to install toolchain from rust-toolchain file."
               exit 1
@@ -119,13 +119,6 @@ jobs:
               echo "Setting override to toolchain: ${toolchain//*,/ }"
               rustup override set ${toolchain//*,/ }
             fi
-          fi
-          # Set the default toolchain
-          echo "Setting default toolchain to: ${toolchain//*,/ }"
-          rustup default ${toolchain//*,/ }
-          if [[ $? -ne 0 ]]; then
-            echo "Error: Failed to set default toolchain."
-            exit 1
           fi
        
       - name: Print installed versions
