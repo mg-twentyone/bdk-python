@@ -27,7 +27,7 @@ jobs:
           - cp313-cp313
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           persist-credentials: false
@@ -53,13 +53,10 @@ jobs:
             ./target
           key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
 
-      - name: List files in bdk-ffi
-        run: ls -la bdk-ffi/bdk-ffi
-      
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          rust-src-dir: bdk-ffi/bdk-ffi
+          rust-src-dir: ./bdk-ffi/bdk-ffi
       
       - run: rustc --version
           
