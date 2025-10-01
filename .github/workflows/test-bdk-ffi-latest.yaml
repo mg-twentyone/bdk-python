@@ -123,7 +123,6 @@ jobs:
           TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
           echo "${TOOLCHAIN}"
           rustup override set "$TOOLCHAIN"
-          rustup default "$TOOLCHAIN"
       
       - name: Print installed versions
         shell: bash
