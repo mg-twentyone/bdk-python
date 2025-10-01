@@ -55,11 +55,11 @@ jobs:
 
       - name: rustup toolchain install ${{inputs.toolchain || 'stable'}}
         env:
-          toolchain: 1.84.1
-          targets: null
-          components: clippy
-          override: true
-          rust_src_dir: "./bdk-ffi/bdk-ffi"
+          toolchain: ${{inputs.toolchain}}
+          targets: ${{inputs.target}}
+          components: ${{inputs.components}}
+          override: ${{inputs.override}}
+          rust_src_dir: ${{inputs.rust-src-dir}}
           shell: bash
           run: |
             echo "Current Directory: $(pwd)"
@@ -104,7 +104,7 @@ jobs:
                 rustup override set ${toolchain//*,/ }
               fi
             fi
-          
+                  
       - name: "Generate bdk.py and binaries"
         run: bash ./scripts/generate-linux.sh
 
