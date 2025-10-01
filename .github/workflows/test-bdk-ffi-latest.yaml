@@ -120,6 +120,13 @@ jobs:
               rustup override set ${toolchain//*,/ }
             fi
           fi
+          # Set the default toolchain
+          echo "Setting default toolchain to: ${toolchain//*,/ }"
+          rustup default ${toolchain//*,/ }
+          if [[ $? -ne 0 ]]; then
+            echo "Error: Failed to set default toolchain."
+            exit 1
+          fi
        
       - name: Print installed versions
         shell: bash
