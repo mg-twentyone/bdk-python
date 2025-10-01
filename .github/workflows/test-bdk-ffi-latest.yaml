@@ -54,7 +54,9 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
 
       - name: List all files recursively
-        run: ls -laR
+        run: |
+          cd ./bdk-ffi/ \
+          ls -laR
       
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
