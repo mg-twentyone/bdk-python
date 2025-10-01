@@ -92,16 +92,11 @@ jobs:
 
           if [[ -z "$toolchain" && ( -f "rust-toolchain" || -f "rust-toolchain.toml") ]]; then
             echo "Installing toolchain from rust-toolchain file..."
-            rustup show active-toolchain || rustup toolchain install
+            rustup show 
             if [[ $? -ne 0 ]]; then
               echo "Error: Failed to install toolchain from rust-toolchain file."
               exit 1
             fi
-
-            TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
-            echo "Setting override and default to toolchain: $TOOLCHAIN"
-            rustup override set "$TOOLCHAIN"
-            rustup default "$TOOLCHAIN"
 
             if [[ -n $components ]]; then
               echo "Adding components: ${components//,/ }"
