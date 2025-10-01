@@ -120,6 +120,7 @@ jobs:
               rustup override set ${toolchain//*,/ }
             fi
           fi
+          echo "$(rustup show active-toolchain | awk '{print $1}')"
           rustup show active-toolchain
           rustup override set $(rustup show active-toolchain | awk '{print $1}')
       
