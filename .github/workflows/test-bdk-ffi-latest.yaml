@@ -97,15 +97,17 @@ jobs:
               echo "Error: Failed to install toolchain from rust-toolchain file."
               exit 1
             fi
-            echo "Print default:"
-            rustup default
-
-            TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
-            if [[ -n "$TOOLCHAIN" ]]; then
-              echo "Setting default toolchain: $TOOLCHAIN"
-              rustup default "$TOOLCHAIN"
+            
+            if ! rustup default; then
+              TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
+              if [[ -n "$TOOLCHAIN" ]]; then
+                echo "Setting default toolchain: $TOOLCHAIN"
+                rustup default "$TOOLCHAIN"
+              else
+                echo "No toolchain installed."
+              fi
             else
-              echo "No toolchain installed."
+                echo "Default toolchain is already set."
             fi
 
             if [[ -n $components ]]; then
