@@ -98,16 +98,9 @@ jobs:
               exit 1
             fi
             
-            if ! rustup default; then
-              TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}' | cut -d- -f1)
-              if [[ -n "$TOOLCHAIN" ]]; then
-                echo "Setting default toolchain: $TOOLCHAIN"
-                rustup default "$TOOLCHAIN"
-              else
-                echo "No toolchain installed."
-              fi
-            else
-                echo "Default toolchain is already set."
+            if ! rustup default &>/dev/null; then
+              TOOLCHAIN=$(rustup show active-toolchain 2>/dev/null | awk '{print $1}' | sed 's/-.*//')
+              [[ -n "$TOOLCHAIN" ]] && rustup default "$TOOLCHAIN" || rustup default stable
             fi
 
             if [[ -n $components ]]; then
