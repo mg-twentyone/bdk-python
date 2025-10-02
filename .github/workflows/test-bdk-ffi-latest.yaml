@@ -53,94 +53,11 @@ jobs:
             ./target
           key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','*Cargo.lock') }}
 
-      - name: Install rustup, if needed
-        shell: bash
-        run: |
-          if ! command -v rustup &> /dev/null ; then
-            curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- --default-toolchain none -y
-
-            # Resolve the correct CARGO_HOME path depending on OS
-            if [[ "$RUNNER_OS" == "Windows" ]]; then
-              echo "${CARGO_HOME:-$USERPROFILE/.cargo}/bin" | sed 's|/|\\|g' >> $GITHUB_PATH
-            else
-              echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
-            fi
-          fi
-        env:
-          RUNNER_OS: "${{ runner.os }}"
-
-      - name: rustup toolchain install ${{inputs.toolchain || 'stable'}}
-        env:
-          toolchain: null
-          targets: null
-          components: clippy
-          override: true
-          rust_src_dir: "./bdk-ffi/bdk-ffi"
-        shell: bash
-        run: |
-          echo "Current Directory: $(pwd)"
-          echo "Rust Source Directory: $rust_src_dir"
-          echo "Toolchain: $toolchain"
-          echo "Targets: $targets"
-          echo "Components: $components"
-          echo "Override: $override"
-
-          if [[ -d "$rust_src_dir" ]]; then
-            cd "$rust_src_dir"
-            echo "Changed directory to: $(pwd)"
-          fi
-
-          if [[ -z "$toolchain" && ( -f "rust-toolchain" || -f "rust-toolchain.toml") ]]; then
-            echo "Installing toolchain from rust-toolchain file..."
-            rustup show active-toolchain || rustup toolchain install
-            if [[ $? -ne 0 ]]; then
-              echo "Error: Failed to install toolchain from rust-toolchain file."
-              exit 1
-            fi
-            
-            if ! rustup default &>/dev/null; then
-              TOOLCHAIN=$(rustup show active-toolchain 2>/dev/null | awk '{print $1}' | sed 's/-.*//')
-              [[ -n "$TOOLCHAIN" ]] && rustup default "$TOOLCHAIN" || rustup default stable
-            fi
-
-            if [[ -n $components ]]; then
-              echo "Adding components: ${components//,/ }"
-              rustup component add ${components//,/ }
-            fi
-            if [[ -n $targets ]]; then
-              echo "Adding targets: ${targets//,/ }"
-              rustup target add ${targets//,/ }
-            fi
-          else
-            if [[ -z "$toolchain" ]]; then
-              toolchain=stable
-            fi
-            echo "Installing specified toolchain: ${toolchain//,/ }"
-            rustup toolchain install ${toolchain//,/ } ${{steps.flags.outputs.targets}}${{steps.flags.outputs.components}} --profile minimal${{steps.flags.outputs.downgrade}} --no-self-update
-            if [[ $? -ne 0 ]]; then
-              echo "Error: Failed to install specified toolchain."
-              exit 1
-            fi
-            if [[ "$override" == "true" ]]; then
-              echo "Setting override to toolchain: ${toolchain//*,/ }"
-              rustup override set ${toolchain//*,/ }
-            fi
-          fi
-      
-      - name: Print installed versions
-        shell: bash
-        run: |
-          echo "rustc-version=$(rustc --version)" >> $GITHUB_OUTPUT
-          rustc --version --verbose
-          echo "cargo-version=$(cargo --version)" >> $GITHUB_OUTPUT
-          cargo --version --verbose
-          echo "rustup-version=$(rustup --version)" >> $GITHUB_OUTPUT
-          rustup --version
-
-          DATE=$(rustc --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
-          HASH=$(rustc --version --verbose | sed -ne 's/^commit-hash: //p')
-          echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
-
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.0
+        with:
+          toolchain: 1.85.1
+          
       - name: "Generate bdk.py and binaries"
         run: bash ./scripts/generate-linux.sh
 
@@ -155,12 +72,6 @@ jobs:
 
       - name: "Run tests"
         run: ${PYBIN}/python -m unittest discover --start "./tests/" --pattern "test_offline_*.py" --verbose
-
-      - name: "Upload artifact test"
-        uses: actions/upload-artifact@v4
-        with:
-          name: bdkpython-manylinux_2_28_x86_64-${{ matrix.python }}
-          path: /home/runner/work/bdk-python/bdk-python/dist/*.whl
 
   test-bdk-ffi-latest-macos-arm64-wheels:
     name: "Build and run unittest on macOS arm64 wheels against the latest commit on bdk-ffi"
@@ -219,12 +130,6 @@ jobs:
       - name: "Run tests"
         run: python3 -m unittest discover --start "./tests/" --pattern "test_offline_*.py" --verbose
 
-      - name: "Upload artifact test"
-        uses: actions/upload-artifact@v4
-        with:
-          name: bdkpython-macos-arm64-${{ matrix.python }}
-          path: /Users/runner/work/bdk-python/bdk-python/dist/*.whl
-
   test-bdk-ffi-latest-macos-x86_64-wheels:
     name: "Build and run unittest on macOS x86_64 wheels against the latest commit on bdk-ffi"
     runs-on: macos-15-intel
@@ -279,12 +184,6 @@ jobs:
       - name: "Run tests"
         run: python3 -m unittest discover --start "./tests/" --pattern "test_offline_*.py" --verbose
 
-      - name: "Upload artifact test"
-        uses: actions/upload-artifact@v4
-        with:
-          name: bdkpython-macos-x86_64-${{ matrix.python }}
-          path: /Users/runner/work/bdk-python/bdk-python/dist/*.whl
-
   test-bdk-ffi-latest-windows-wheels:
     name: "Build and run unittest on Windows wheels against the latest commit on bdk-ffi"
     runs-on: windows-2022
@@ -333,12 +232,6 @@ jobs:
 
       - name: "Build wheel"
         run: python -m build --wheel --verbose
-
-      - name: "Upload artifact test"
-        uses: actions/upload-artifact@v4
-        with:
-          name: bdkpython-windows-${{ matrix.python }}
-          path: D:\a\bdk-python\bdk-python\dist\*.whl
 
       - name: "Install dependencies"
         run: Get-ChildItem 'D:\a\bdk-python\bdk-python\dist\*.whl' | ForEach-Object {pip install $_.FullName}
