@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   test-bdk-ffi-latest-manylinux_2_28-x86_64-wheels:
-    name: "Build and run unittest on Manylinux 2.28 x86_64 wheels against the latest commit on bdk-ffi"
+    name: "Build and run unittest on manylinux 2.28 x86_64 wheels against the latest commit on bdk-ffi"
     runs-on: ubuntu-24.04
     container:
       image: quay.io/pypa/manylinux_2_28_x86_64
